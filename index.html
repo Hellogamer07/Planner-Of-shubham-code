@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shubham's Ultimate Pro Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Montserrat',sans-serif;}
+body{min-height:100vh;transition: background 0.3s,color 0.3s;}
+body.dark{background:#0f172a;color:#fff;}
+body.light{background:#f1f5f9;color:#111;}
+header{padding:35px 20px;text-align:center;border-bottom-left-radius:30px;border-bottom-right-radius:30px;box-shadow:0 8px 20px rgba(0,0,0,0.3);}
+header.dark{background:linear-gradient(135deg,#2563eb,#38bdf8);color:white;}
+header.light{background:linear-gradient(135deg,#60a5fa,#93c5fd);color:#111;}
+header h1{font-size:32px;margin-bottom:8px;}
+header p{opacity:0.9;font-size:16px;}
+button{background:linear-gradient(135deg,#2563eb,#38bdf8);border:none;padding:10px 18px;border-radius:15px;color:white;font-weight:600;cursor:pointer;transition: transform 0.2s;}
+button:hover{transform: scale(1.05);}
+.container{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:25px;padding:30px; max-width:1200px;margin:auto;}
+.card{background: rgba(255,255,255,0.05);backdrop-filter: blur(12px);border-radius:20px;padding:25px;box-shadow:0 8px 25px rgba(0,0,0,0.5);transition: transform 0.3s, box-shadow 0.3s;}
+.card:hover{transform: translateY(-8px);box-shadow:0 12px 30px rgba(0,0,0,0.7);}
+.card h2{color:#38bdf8;margin-bottom:15px;font-size:22px;}
+.section{display:none;padding:30px;animation:fade 0.5s ease;}
+.section.active{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);}}
+label{display:flex;align-items:center;gap:12px;margin-bottom:12px;cursor:pointer;}
+input[type="checkbox"]{width:20px;height:20px;transform:scale(1.2);}
+.todo-input{display:flex;gap:10px;margin-bottom:15px;}
+.todo-input input{flex:1;padding:10px;border-radius:12px;border:none;}
+.todo-item{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.todo-item.completed span{text-decoration:line-through;opacity:0.6;}
+.todo-item button{background:#dc2626;padding:4px 7px;border-radius:8px;border:none;color:white;cursor:pointer;}
+.progress-bar-container{background:#1e293b;border-radius:12px;overflow:hidden;margin-bottom:15px;height:20px;}
+.progress-bar{background:#38bdf8;height:100%;width:0%;transition: width 0.3s;}
+footer{text-align:center;padding:15px;color:#94a3b8;font-size:14px;margin-top:20px;}
+.calendar{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:15px;}
+.calendar-day{width:35px;height:35px;display:flex;align-items:center;justify-content:center;border-radius:6px;cursor:pointer;transition:transform 0.2s;}
+.calendar-day:hover{transform:scale(1.1);}
+.calendar-day.today{border:2px solid #38bdf8;font-weight:600;}
+.calendar-day.completed{background:#38bdf8;color:#fff;}
+.history-day{margin-bottom:15px;padding:12px;background:rgba(255,255,255,0.05);border-radius:12px;}
+.history-day h3{margin-bottom:8px;color:#60a5fa;font-size:18px;}
+.toggle-mode{position:fixed;top:15px;right:20px;padding:8px 12px;border-radius:12px;background:linear-gradient(135deg,#2563eb,#38bdf8);color:white;cursor:pointer;z-index:1000;}
+.chart-container{margin-top:20px;background:rgba(255,255,255,0.05);padding:15px;border-radius:15px;}
+</style>
+</head>
+<body class="dark">
+
+<div class="toggle-mode" onclick="toggleMode()">Toggle Light/Dark</div>
+<header class="dark">
+  <h1>📘 Shubham’s Ultimate Pro Planner</h1>
+  <p>Focus • Discipline • Consistency</p>
+</header>
+
+<!-- HOME -->
+<div id="home" class="section active container">
+  <div class="card"><h2>🎥 Fateh Series</h2><button onclick="openSection('fateh')">Enter</button></div>
+  <div class="card"><h2>📖 Revision</h2><button onclick="openSection('revision')">Enter</button></div>
+  <div class="card"><h2>🏫 School Work</h2><button onclick="openSection('school')">Enter</button></div>
+  <div class="card"><h2>📝 To-Do List</h2><button onclick="openSection('todo')">Enter</button></div>
+  <div class="card"><h2>📅 Calendar / History</h2><button onclick="openSection('history')">Enter</button></div>
+  <div class="card"><h2>📊 Weekly / Monthly Charts</h2><button onclick="openSection('charts')">Enter</button></div>
+</div>
+
+<!-- SECTIONS -->
+<div id="fateh" class="section container">
+  <div class="card">
+    <h2>🎥 Fateh Series Lectures</h2>
+    <label><input type="checkbox" class="task" data-id="fateh1"> Lecture 1 Completed</label>
+    <label><input type="checkbox" class="task" data-id="fateh2"> Lecture 2 Completed</label>
+    <div class="progress-bar-container"><div class="progress-bar" id="fatehProgress"></div></div>
+    <button onclick="goHome()">⬅ Back</button>
+  </div>
+</div>
+
+<div id="revision" class="section container">
+  <div class="card">
+    <h2>📖 Revision & Practice</h2>
+    <label><input type="checkbox" class="task" data-id="rev1"> Chapter Revision</label>
+    <label><input type="checkbox" class="task" data-id="rev2"> Question Practice</label>
+    <div class="progress-bar-container"><div class="progress-bar" id="revProgress"></div></div>
+    <button onclick="goHome()">⬅ Back</button>
+  </div>
+</div>
+
+<div id="school" class="section container">
+  <div class="card">
+    <h2>🏫 School Work</h2>
+    <label><input type="checkbox" class="task" data-id="school1"> Homework</label>
+    <label><input type="checkbox" class="task" data-id="school2"> Project</label>
+    <div class="progress-bar-container"><div class="progress-bar" id="schoolProgress"></div></div>
+    <button onclick="goHome()">⬅ Back</button>
+  </div>
+</div>
+
+<div id="todo" class="section container">
+  <div class="card">
+    <h2>📝 To-Do List</h2>
+    <div class="todo-input"><input id="todoInput" placeholder="Add a task"><button onclick="addTodo()">Add</button></div>
+    <div id="todoList"></div>
+    <div class="progress-bar-container"><div class="progress-bar" id="todoProgress"></div></div>
+    <button onclick="goHome()">⬅ Back</button>
+  </div>
+</div>
+
+<div id="history" class="section container">
+  <div class="card">
+    <h2>📅 Calendar / History</h2>
+    <div class="calendar" id="calendar"></div>
+    <div id="historyList"></div>
+    <button onclick="goHome()">⬅ Back</button>
+  </div>
+</div>
+
+<div id="charts" class="section container">
+  <div class="card chart-container">
+    <h2>📊 Weekly Progress</h2>
+    <canvas id="weeklyChart"></canvas>
+    <h2 style="margin-top:15px;">📊 Monthly Progress</h2>
+    <canvas id="monthlyChart"></canvas>
+    <button onclick="goHome()">⬅ Back</button>
+  </div>
+</div>
+
+<footer>© 2026 | Shubham’s Ultimate Pro Planner</footer>
+
+<script>
+// --- MODE ---
+let mode = localStorage.getItem('mode')||'dark';
+document.body.className=mode;
+document.querySelector('header').className=mode;
+function toggleMode(){mode=mode==='dark'?'light':'dark';document.body.className=mode;document.querySelector('header').className=mode;localStorage.setItem('mode',mode);}
+
+// --- NAVIGATION ---
+function openSection(id){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function goHome(){openSection('home');}
+
+// --- HISTORY & DAILY DATA ---
+const todayKey = new Date().toISOString().slice(0,10);
+let history = JSON.parse(localStorage.getItem('history'))||{};
+if(!history[todayKey]) history[todayKey]={tasks:{},todo:[]};
+localStorage.setItem('history',JSON.stringify(history));
+
+// --- TASKS ---
+document.querySelectorAll('.task').forEach(ch=>{
+  const id=ch.dataset.id;
+  const saved = history[todayKey].tasks[id];
+  ch.checked=saved||false;
+  ch.addEventListener('change',()=>{
+    history[todayKey].tasks[id]=ch.checked;saveHistory();updateProgress();
+  });
+});
+
+// --- TO-DO ---
+let todos=history[todayKey].todo||[];
+const todoList=document.getElementById('todoList');
+function renderTodo(){todoList.innerHTML='';todos.forEach((t,i)=>{const div=document.createElement('div');div.className='todo-item'+(t.done?" completed":"");div.innerHTML=`<input type="checkbox" ${t.done?"checked":""} onchange="toggleTodo(${i})"> <span>${t.text}</span> <button onclick="deleteTodo(${i})">X</button>`;todoList.appendChild(div);});}
+function addTodo(){const input=document.getElementById('todoInput');if(input.value.trim()){todos.push({text:input.value,done:false});input.value='';saveHistory();renderTodo();}}
+function toggleTodo(i){todos[i].done=!todos[i].done;saveHistory();renderTodo();}
+function deleteTodo(i){todos.splice(i,1);saveHistory();renderTodo();}
+renderTodo();
+
+// --- PROGRESS ---
+function updateProgress(){
+['fateh','revision','school','todo'].forEach(sec=>{
+  const boxes=document.querySelectorAll(`#${sec} .task`);
+  let completed = Array.from(boxes).filter(b=>b.checked).length;
+  let percent = boxes.length?Math.round(completed/boxes.length*100):0;
+  const bar=document.getElementById(sec==='revision'?'revProgress':sec==='fateh'?'fatehProgress':sec==='school'?'schoolProgress':'todoProgress');
+  bar.style.width = percent+'%';
+});
+}
+updateProgress();
+
+// --- SAVE HISTORY ---
+function saveHistory(){history[todayKey].todo=todos;localStorage.setItem('history',JSON.stringify(history));renderHistory();updateProgress();renderCalendar();renderCharts();}
+
+// --- HISTORY VIEW ---
+function renderHistory(){
+  const historyList=document.getElementById('historyList');
+  historyList.innerHTML='';
+  Object.keys(history).sort().reverse().forEach(date=>{
+    const div=document.createElement('div');div.className='history-day';
+    let html=`<h3>${date}</h3>`;
+    html+='<b>Fateh:</b> '+['fateh1','fateh2'].map(id=>history[date].tasks[id]? "✅":"❌").join(' | ')+'<br>';
+    html+='<b>Revision:</b> '+['rev1','rev2'].map(id=>history[date].tasks[id]? "✅":"❌").join(' | ')+'<br>';
+    html+='<b>School:</b> '+['school1','school2'].map(id=>history[date].tasks[id]? "✅":"❌").join(' | ')+'<br>';
+    html+='<b>To-Do:</b> '+(history[date].todo.length?history[date].todo.map(t=>t.done?"✅ "+t.text:"❌ "+t.text).join(', '):'No tasks');
+    div.innerHTML=html;historyList.appendChild(div);
+  });
+}
+renderHistory();
+
+// --- CALENDAR ---
+function renderCalendar(){
+  const cal=document.getElementById('calendar');cal.innerHTML='';
+  const dates=Object.keys(history).sort();
+  dates.forEach(d=>{
+    const day=document.createElement('div');day.className='calendar-day';day.textContent=d.slice(8,10);
+    if(d===todayKey) day.classList.add('today');
+    const allDone=[...['fateh1','fateh2','rev1','rev2','school1','school2']].every(id=>history[d].tasks[id]) && history[d].todo.every(t=>t.done);
+    if(allDone) day.classList.add('completed');
+    day.addEventListener('click',()=>{openSection('history');showDay(d);});
+    cal.appendChild(day);
+  });
+}
+function showDay(d){const historyList=document.getElementById('historyList');historyList.innerHTML='';const div=document.createElement('div');div.className='history-day';
+  let html=`<h3>${d}</h3>`;
+  html+='<b>Fateh:</b> '+['fateh1','fateh2'].map(id=>history[d].tasks[id]? "✅":"❌").join(' | ')+'<br>';
+  html+='<b>Revision:</b> '+['rev1','rev2'].map(id=>history[d].tasks[id]? "✅":"❌").join(' | ')+'<br>';
+  html+='<b>School:</b> '+['school1','school2'].map(id=>history[d].tasks[id]? "✅":"❌").join(' | ')+'<br>';
+  html+='<b>To-Do:</b> '+(history[d].todo.length?history[d].todo.map(t=>t.done?"✅ "+t.text:"❌ "+t.text).join(', '):'No tasks');
+  div.innerHTML=html;historyList.appendChild(div);
+}
+renderCalendar();
+
+// --- CHARTS ---
+function renderCharts(){
+  const ctxWeek=document.getElementById('weeklyChart').getContext('2d');
+  const ctxMonth=document.getElementById('monthlyChart').getContext('2d');
+  const dates=Object.keys(history).sort().slice(-7); // weekly
+  const weeklyData=dates.map(d=>{
+    const t=['fateh1','fateh2','rev1','rev2','school1','school2'];
+    const tasksDone=t.filter(id=>history[d].tasks[id]).length;
+    const todoDone=history[d].todo.filter(x=>x.done).length;
+    const total=t.length+history[d].todo.length;
+    return total?Math.round((tasksDone+todoDone)/total*100):0;
+  });
+  new Chart(ctxWeek,{type:'bar',data:{labels:dates, datasets:[{label:'Daily % Complete',data:weeklyData,backgroundColor:'#38bdf8'}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:100}}}});
+  
+  const monthDates=Object.keys(history).sort().slice(-30);
+  const monthData=monthDates.map(d=>{
+    const t=['fateh1','fateh2','rev1','rev2','school1','school2'];
+    const tasksDone=t.filter(id=>history[d].tasks[id]).length;
+    const todoDone=history[d].todo.filter(x=>x.done).length;
+    const total=t.length+history[d].todo.length;
+    return total?Math.round((tasksDone+todoDone)/total*100):0;
+  });
+  new Chart(ctxMonth,{type:'line',data:{labels:monthDates,datasets:[{label:'Daily % Complete',data:monthData,fill:false,borderColor:'#38bdf8',tension:0.3} ]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:100}}}});
+}
+renderCharts();
+
+// --- NOTIFICATIONS ---
+if(Notification.permission!=="granted") Notification.requestPermission();
+function dailyNotification(){if(Notification.permission==="granted"){new Notification("Shubham's Planner","Time to check your daily tasks!");}}
+setTimeout(dailyNotification,3000); // demo: 3s after load
+</script>
+</body>
+</html>
